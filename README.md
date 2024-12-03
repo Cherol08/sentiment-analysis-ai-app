@@ -1,4 +1,4 @@
-# sentiment-analysis-test-app
+# Sentiment analysis AI test application
 
 A Python terminal-based LLM app for sentiment analysis.
 This application uses a transformers sentiment analysis model  for training on IMDb datasets 
