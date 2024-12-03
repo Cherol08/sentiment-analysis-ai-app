@@ -9,16 +9,14 @@ import sys
 # Load IMDb dataset
 dataset = load_dataset("imdb")
 
-# Inspect the dataset
-print(dataset)
-print(dataset['train'][0])  # First training sample
+# print(dataset)
+# print(dataset['train'][0])  # First training sample
 
 # Use the pre-defined splits
-train_data = dataset["train"].shuffle(seed=42).select(range(1000))  # Smaller subset for faster training
+train_data = dataset["train"].shuffle(seed=42).select(range(1000))  
 test_data = dataset["test"].shuffle(seed=42).select(range(200))    # Validation subset
 
 
-# Load the tokenizer
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
 # Tokenize the dataset
@@ -37,7 +35,6 @@ test_data.set_format(type="torch", columns=["input_ids", "attention_mask", "labe
 # Load the model
 model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=2)  # 2 labels: positive/negative
 
-# Set Training arguments
 training_args = TrainingArguments(
     output_dir="./results",
     eval_strategy="epoch",
@@ -51,7 +48,7 @@ training_args = TrainingArguments(
 )
 
 
-# Initialize the Trainer
+# Init Trainer
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -59,14 +56,12 @@ trainer = Trainer(
     eval_dataset=test_data,
 )
 
-# Train the model
+# Train & save the model locally
 trainer.train()
-# Evaluate the model
 results = trainer.evaluate()
-# Save the model and tokenizer
-# Save both model and tokenizer
-trainer.save_model("./results")  # Saves the model (pytorch_model.bin or model.safetensors) and config.json
-tokenizer.save_pretrained("./results")  # Saves the tokenizer files
+
+trainer.save_model("./results")  
+tokenizer.save_pretrained("./results") 
 
 
 print(results)
@@ -74,7 +69,6 @@ print(results)
 # Load the fine-tuned model into a pipeline
 sentiment_pipeline = pipeline("sentiment-analysis", model="./results")
 
-# Test the model
 while True:
     text =  input("Type text for sentiment Analysis...(Type Q to quit):\n")
     if text.lower() == 'q':
@@ -84,17 +78,14 @@ while True:
     # Get sentiment prediction
     prediction = sentiment_pipeline(text)[0]
     
-    # Extract label and score
     label = prediction['label']
     score = prediction['score']
-    
-    # Map labels to human-readable names (optional if labels are already clear)
     label_mapping = {
         "LABEL_0": "Negative",
         "LABEL_1": "Positive"
     }
+    
     readable_label = label_mapping.get(label, label)  # Default to label if mapping not found
     
-    # Print human-readable feedback
     print(f"\nSentiment: {readable_label}")
-    print(f"Confidence: {score:.2%}\n")  # Convert to percentage with two decimal places
+    print(f"Confidence: {score:.2%}\n")
